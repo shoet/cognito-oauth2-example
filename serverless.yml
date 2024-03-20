@@ -1,0 +1,49 @@
+service: amplify-example
+frameworkVersion: "3"
+provider:
+  name: aws
+  runtime: provided.al2
+  stage: dev
+  region: ap-northeast-1
+
+resources:
+  Resources:
+    CognitoIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: ${self:service}-cognito-identity-pool
+        AllowUnauthenticatedIdentities: false
+        CognitoIdentityProviders:
+          - ClientId: !Ref CognitoUserPoolClient
+            ProviderName: !GetAtt CognitoUserPool.ProviderName
+
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-cognito-user-pool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireNumbers: true
+        Schema:
+          - Name: email
+            Required: true
+            AttributeDataType: String
+            Mutable: true
+          - Name: name
+            Required: true
+            AttributeDataType: String
+            Mutable: true
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-cognito-user-pool-client
+        UserPoolId: !Ref CognitoUserPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        GenerateSecret: false
