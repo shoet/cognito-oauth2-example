@@ -3,6 +3,8 @@ import { BaseLayout } from "./components/layout/BaseLayout";
 import { Config } from "./config";
 import "@aws-amplify/ui-react/styles.css";
 import { Authenticator } from "@aws-amplify/ui-react";
+import styled from "styled-components";
+import { PropsWithChildren } from "react";
 
 const ampConfig = {
   Auth: {
@@ -48,14 +50,36 @@ const formFields = {
   },
 };
 
+const AuthenticatorWithStyle = (props: PropsWithChildren) => {
+  const { children } = props;
+  const className = "authenticator";
+
+  const StyleContainer = styled.div`
+    .${className} {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  `;
+
+  return (
+    <StyleContainer>
+      <Authenticator className={className} formFields={formFields}>
+        {children}
+      </Authenticator>
+    </StyleContainer>
+  );
+};
+
 function App() {
   return (
     <>
-      <Authenticator formFields={formFields}>
+      <AuthenticatorWithStyle>
         <BaseLayout>
           <div>hoge</div>
         </BaseLayout>
-      </Authenticator>
+      </AuthenticatorWithStyle>
     </>
   );
 }
