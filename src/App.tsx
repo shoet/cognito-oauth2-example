@@ -2,11 +2,11 @@ import { Amplify } from "aws-amplify";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { Config } from "./config";
 import "@aws-amplify/ui-react/styles.css";
-import { Authenticator } from "@aws-amplify/ui-react";
-import styled from "styled-components";
-import { PropsWithChildren } from "react";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import "aws-amplify/auth/enable-oauth-listener";
+import { Outlet } from "react-router-dom";
 
-const ampConfig = {
+Amplify.configure({
   Auth: {
     Cognito: {
       userPoolId: Config.AWS_USER_POOL_ID,
@@ -17,10 +17,22 @@ const ampConfig = {
           required: true,
         },
       },
+      loginWith: {
+        oauth: {
+          domain: Config.AWS_COGNITO_DOMAIN,
+          scopes: ["email", "profile", "openid"],
+          redirectSignIn: ["http://localhost:5174/home"],
+          redirectSignOut: [
+            "http://google.com", // Authenticator配下のコンポーネントだとエラーになるっぽいのでGoogleを設定する
+            // "http://localhost:5174/logout", // エラーになる
+          ],
+          providers: ["Google"],
+          responseType: "code",
+        },
+      },
     },
   },
-};
-Amplify.configure(ampConfig);
+});
 
 const formFields = {
   signUp: {
@@ -50,38 +62,19 @@ const formFields = {
   },
 };
 
-const AuthenticatorWithStyle = (props: PropsWithChildren) => {
-  const { children } = props;
-  const className = "authenticator";
-
-  const StyleContainer = styled.div`
-    .${className} {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  `;
-
-  return (
-    <StyleContainer>
-      <Authenticator className={className} formFields={formFields}>
-        {children}
-      </Authenticator>
-    </StyleContainer>
-  );
-};
+export default withAuthenticator(App, {
+  socialProviders: ["google"],
+  formFields: formFields,
+});
 
 function App() {
   return (
     <>
-      <AuthenticatorWithStyle>
-        <BaseLayout>
-          <div>hoge</div>
-        </BaseLayout>
-      </AuthenticatorWithStyle>
+      <BaseLayout>
+        <Outlet />
+      </BaseLayout>
     </>
   );
 }
 
-export default App;
+// export default App;
