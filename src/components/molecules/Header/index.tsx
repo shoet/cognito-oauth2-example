@@ -10,30 +10,45 @@ const Container = styled.div`
 
 type UserProfileProps = {
   user: AuthUser;
+  signOut: () => Promise<void>;
 };
 
 const UserProfile = (props: UserProfileProps) => {
-  const { user } = props;
+  const { user, signOut } = props;
   const UserProfileContainer = styled.div``;
   const UserName = styled.span`
     font-size: 14px
-    font-weight: bold;
     color: #212121;
+  `;
+
+  const SignOutButton = styled.span`
+    font-size: 20px;
+    font-weight: bold;
+    color: blue;
+    cursor: pointer;
+    border-bottom: 1px solid blue;
   `;
 
   return (
     <UserProfileContainer>
+      Hi!
       <UserName>{user.username}</UserName>
+      <SignOutButton onClick={signOut}>Sign Out</SignOutButton>
     </UserProfileContainer>
   );
 };
 
 export const Header = () => {
-  const { user } = useAuthenticator();
+  const { user, signOut } = useAuthenticator();
+  const handleSignOut = async () => {
+    signOut();
+  };
   return (
     <Container>
       <h1>Logo</h1>
-      <Container>{user && <UserProfile user={user} />}</Container>
+      <Container>
+        {user && <UserProfile user={user} signOut={handleSignOut} />}
+      </Container>
     </Container>
   );
 };
